@@ -1,19 +1,37 @@
+// models/User.js
+// Data access for the users table. No ORM: plain parameterised queries.
+// Parameterised ($1, $2) rather than string concatenation, so the input
+// cannot be read as SQL.
 
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const { query } = require('../config/db');
 
-const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    university: { type: String },
-    address: { type: String },
-});
+const VALID_ROLES = ['attendee', 'organizer'];
 
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-});
+const findByUsername = async (username) => {
+  const { rows } = await query(
+    'SELECT id, username, password, role FROM users WHERE username = $1',
+    [username]
+  );
+  return rows[0] || null;
+};
 
-module.exports = mongoose.model('User', userSchema);
+const findById = async (id) => {
+  const { rows } = await query(
+    'SELECT id, username, role FROM users WHERE id = $1',
+    [id]
+  );
+  return rows[0] || null;
+};
+
+// Returns the new user without the password hash.
+const create = async ({ username, passwordHash, role }) => {
+  const { rows } = await query(
+    `INSERT INTO users (username, password, role)
+     VALUES ($1, $2, $3)
+     RETURNING id, username, role`,
+    [username, passwordHash, role]
+  );
+  return rows[0];
+};
+
+module.exports = { findByUsername, findById, create, VALID_ROLES };
