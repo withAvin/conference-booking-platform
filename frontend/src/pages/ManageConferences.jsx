@@ -5,15 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { Button, Banner, EmptyState, Page } from '../components/ui';
-
-const formatWhen = (startsAt, endsAt) => {
-  const start = new Date(startsAt);
-  const end = new Date(endsAt);
-  const date = start.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
-  const time = (d) =>
-    d.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: false });
-  return `${date} · ${time(start)} – ${time(end)}`;
-};
+import { formatWhen } from '../utils/format';
 
 const ManageConferences = () => {
   const [conferences, setConferences] = useState([]);
