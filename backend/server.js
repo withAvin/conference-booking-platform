@@ -15,6 +15,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 
 app.use('/api/conferences', require('./routes/conferenceRoutes'));
 
+app.use('/api/registrations', require('./routes/registrationRoutes'));
+
 // Health check, useful for confirming the EC2 deployment is up.
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
