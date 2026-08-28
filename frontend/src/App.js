@@ -2,13 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Header from './components/Header';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import BrowseConferences from './pages/BrowseConferences';
 import ManageConferences from './pages/ManageConferences';
 import ConferenceForm from './pages/ConferenceForm';
 import { useAuth } from './context/AuthContext';
 
-// Client-side guard. This is convenience, not security: the real
-// enforcement is organizerOnly on the server, which is what SC-06
-// tests by requesting the route directly.
+// Client-side guard. Convenience, not security: the real enforcement
+// is organizerOnly on the server, which is what SC-06 tests by
+// requesting the endpoint directly.
 const RequireRole = ({ role, children }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -33,6 +34,15 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           <Route
+            path="/browse"
+            element={
+              <RequireRole role="attendee">
+                <BrowseConferences />
+              </RequireRole>
+            }
+          />
+
+          <Route
             path="/conferences"
             element={
               <RequireRole role="organizer">
@@ -49,7 +59,6 @@ function App() {
             }
           />
 
-          {/* Attendee routes arrive with CBP-9 onwards. */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

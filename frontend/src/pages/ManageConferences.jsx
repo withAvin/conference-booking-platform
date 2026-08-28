@@ -1,21 +1,20 @@
 // pages/ManageConferences.jsx — S07
-// CBP-8 needs a destination after saving. The booked-against-capacity
-// display and the full marking are finished in CBP-9.
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { Button, Banner, EmptyState, Page } from '../components/ui';
-import { formatWhen } from '../utils/format';
+import ConferenceRow from '../components/ConferenceRow';
 
 const ManageConferences = () => {
   const [conferences, setConferences] = useState([]);
-  const [banner, setBanner] = useState('');
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (location.state?.created) {
-      setBanner(`Conference created: ${location.state.created}`);
+      setSuccess(`Conference created: ${location.state.created}`);
       window.history.replaceState({}, '');
     }
   }, [location.state]);
@@ -24,35 +23,38 @@ const ManageConferences = () => {
     axiosInstance
       .get('/api/conferences')
       .then(({ data }) => setConferences(data))
-      .catch(() => setBanner('Could not load conferences'));
+      .catch(() => setError('Could not load conferences'));
   }, []);
+
+  // Edit and delete arrive in a later story. The buttons render now so
+  // the screen matches S07 in the prototype.
+  const notYet = () => setError('Edit and delete are not implemented yet');
 
   return (
     <Page
       title="Manage conferences"
       action={<Button onClick={() => navigate('/conferences/new')}>Add conference</Button>}
     >
-      {banner && <Banner type="success" message={banner} onClose={() => setBanner('')} />}
+      <Banner type="success" message={success} onClose={() => setSuccess('')} />
+      <Banner type="error" message={error} onClose={() => setError('')} />
 
       {conferences.length === 0 ? (
         <EmptyState
           headline="Add your first conference"
-          action={<Button onClick={() => navigate('/conferences/new')}>Add conference</Button>}
+          action={
+            <Button onClick={() => navigate('/conferences/new')}>Add conference</Button>
+          }
         />
       ) : (
         <div className="flex flex-col gap-3">
           {conferences.map((c) => (
-            <div
+            <ConferenceRow
               key={c.id}
-              className="flex justify-between items-center px-5 py-4 rounded-lg bg-surface border border-line"
-            >
-              <div>
-                <p className="text-base font-medium text-ink">{c.title}</p>
-                <p className="text-[13px] text-ink-soft mt-1">
-                  {formatWhen(c.starts_at, c.ends_at)} · {c.booked} / {c.capacity} booked
-                </p>
-              </div>
-            </div>
+              conference={c}
+              variant="organizer"
+              onAction={notYet}
+              onSecondary={notYet}
+            />
           ))}
         </div>
       )}

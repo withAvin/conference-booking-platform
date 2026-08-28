@@ -1,31 +1,43 @@
 // models/Conference.js
 const { query } = require('../config/db');
 
-// Every list view needs the confirmed count, so it is computed here
-// rather than in each caller. Cancelled rows are excluded, which is
-// what makes BR-01 correct.
-const CONFERENCE_WITH_COUNT = `
-  SELECT c.id,
-         c.title,
-         c.starts_at,
-         c.ends_at,
-         c.capacity,
-         COUNT(r.id)::int AS booked
-    FROM conferences c
-    LEFT JOIN registrations r
-      ON r.conference_id = c.id AND r.status = 'confirmed'
-`;
-
-const findAll = async () => {
+// booked is the confirmed count, which BR-01 checks against capacity.
+// bookedByMe lets the attendee browse screen mark rows the caller has
+// already booked, without a second request.
+const findAll = async (userId = null) => {
   const { rows } = await query(
-    `${CONFERENCE_WITH_COUNT} GROUP BY c.id ORDER BY c.starts_at`
+    `SELECT c.id,
+            c.title,
+            c.starts_at,
+            c.ends_at,
+            c.capacity,
+            COUNT(r.id)::int AS booked,
+            BOOL_OR(r.attendee_id = $1) AS "bookedByMe"
+       FROM conferences c
+       LEFT JOIN registrations r
+         ON r.conference_id = c.id AND r.status = 'confirmed'
+      GROUP BY c.id
+      ORDER BY c.starts_at`,
+    [userId]
   );
-  return rows;
+
+  // BOOL_OR returns null when a conference has no confirmed rows.
+  return rows.map((r) => ({ ...r, bookedByMe: r.bookedByMe === true }));
 };
 
 const findById = async (id) => {
   const { rows } = await query(
-    `${CONFERENCE_WITH_COUNT} WHERE c.id = $1 GROUP BY c.id`,
+    `SELECT c.id,
+            c.title,
+            c.starts_at,
+            c.ends_at,
+            c.capacity,
+            COUNT(r.id)::int AS booked
+       FROM conferences c
+       LEFT JOIN registrations r
+         ON r.conference_id = c.id AND r.status = 'confirmed'
+      WHERE c.id = $1
+      GROUP BY c.id`,
     [id]
   );
   return rows[0] || null;
@@ -38,7 +50,7 @@ const create = async ({ title, startsAt, endsAt, capacity }) => {
      RETURNING id, title, starts_at, ends_at, capacity`,
     [title, startsAt, endsAt, capacity]
   );
-  return { ...rows[0], booked: 0 };
+  return { ...rows[0], booked: 0, bookedByMe: false };
 };
 
 module.exports = { findAll, findById, create };
