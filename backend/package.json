@@ -7,19 +7,18 @@
     "test": "mocha",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "prod": "node server.js"
+    "prod": "node server.js",
+    "seed": "node db/seed.js"
   },
   "dependencies": {
-    "bcrypt": "^5.0.1",
+    "bcryptjs": "^3.0.3",
     "chai": "^4.5.0",
     "chai-http": "^4.3.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.0.14",
-    "request": "^2.88.2",
-    "task-manager": "file:.."
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "esm": "^3.2.25",
