@@ -2,21 +2,18 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
-import { useAuth } from '../context/AuthContext';
 import { Button, Field, Banner } from '../components/ui';
 
 const Signup = () => {
   const [form, setForm] = useState({ username: '', password: '', role: 'attendee' });
   const [error, setError] = useState('');
-  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     setError('');
     try {
-      const { data } = await axiosInstance.post('/api/auth/register', form);
-      login(data);
-      navigate(data.role === 'organizer' ? '/conferences' : '/browse');
+      await axiosInstance.post('/api/auth/register', form);
+      navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');
     }
