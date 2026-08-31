@@ -3,13 +3,14 @@ import Header from './components/Header';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import BrowseConferences from './pages/BrowseConferences';
+import MyBookings from './pages/MyBookings';
 import ManageConferences from './pages/ManageConferences';
 import ConferenceForm from './pages/ConferenceForm';
 import { useAuth } from './context/AuthContext';
 
 // Client-side guard. Convenience, not security: the real enforcement
-// is organizerOnly on the server, which is what SC-06 tests by
-// requesting the endpoint directly.
+// is organizerOnly and attendeeOnly on the server, which is what SC-06
+// tests by requesting the endpoints directly.
 const RequireRole = ({ role, children }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -38,6 +39,14 @@ function App() {
             element={
               <RequireRole role="attendee">
                 <BrowseConferences />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/my-bookings"
+            element={
+              <RequireRole role="attendee">
+                <MyBookings />
               </RequireRole>
             }
           />
