@@ -274,3 +274,7 @@ defending its absence.
 - Subtask 6.5 added to CBP-10 for the time lock, which was not in the
   original breakdown
 - D-05 partially superseded: CBP-14 and CBP-15 remain deferred
+- CBP-74 booking viewing was also reinstated on the same reasoning:
+  an attendee with no way to see their own bookings is a visible gap,
+  and the endpoint already existed. CBP-15 change and cancel remains
+  deferred.

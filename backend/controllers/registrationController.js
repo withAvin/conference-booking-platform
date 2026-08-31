@@ -12,9 +12,35 @@ const timeRange = (startsAt, endsAt) => {
   )} on ${start.toLocaleDateString('en-AU', dateOpts)}`;
 };
 
-// CBP-10 Book a conference.
-// Each refusal states why, which is what SC-08 asks for. The clash
-// message names the conference, so the attendee knows what to cancel.
+// Both book and change fail in the same ways, so the translation from
+// BookingError to an HTTP response is shared.
+const sendBookingError = (res, error, context) => {
+  if (error.code === 'FULL') {
+    return res.status(409).json({ message: error.message });
+  }
+
+  if (error.code === 'CLASH') {
+    const { title, starts_at, ends_at } = error.details.clashesWith;
+    return res.status(409).json({
+      message: `Clashes with ${title}, ${timeRange(starts_at, ends_at)}.`,
+    });
+  }
+
+  if (error.code === 'NOT_FOUND') {
+    return res.status(404).json({ message: error.message });
+  }
+
+  if (error.code === 'DUPLICATE' || error.code === '23505') {
+    return res.status(409).json({
+      message: error.message || 'You have already booked this conference',
+    });
+  }
+
+  console.error(`${context} failed:`, error.message);
+  return res.status(500).json({ message: 'Something went wrong' });
+};
+
+// CBP-10 Book.
 const createBooking = async (req, res) => {
   const conferenceId = Number(req.body.conferenceId);
 
@@ -26,31 +52,39 @@ const createBooking = async (req, res) => {
     const registration = await Registration.book(req.user.id, conferenceId);
     return res.status(201).json(registration);
   } catch (error) {
-    if (error.code === 'FULL') {
-      return res.status(409).json({ message: error.message });
-    }
+    return sendBookingError(res, error, 'Booking');
+  }
+};
 
-    if (error.code === 'CLASH') {
-      const { title, starts_at, ends_at } = error.details.clashesWith;
-      return res.status(409).json({
-        message: `Clashes with ${title}, ${timeRange(starts_at, ends_at)}.`,
-      });
-    }
+// CBP-15 Change. On failure the original booking is unchanged, because
+// the whole operation rolls back.
+const changeBooking = async (req, res) => {
+  const registrationId = Number(req.params.id);
+  const conferenceId = Number(req.body.conferenceId);
 
-    if (error.code === 'NOT_FOUND') {
-      return res.status(404).json({ message: error.message });
-    }
+  if (!Number.isInteger(conferenceId)) {
+    return res.status(400).json({ message: 'A conference must be chosen' });
+  }
 
-    // The partial unique index on (attendee_id, conference_id) where
-    // status = 'confirmed' catches a double submit. The overlap check
-    // cannot: under strict inequalities a conference does not overlap
-    // itself.
-    if (error.code === '23505') {
-      return res.status(409).json({ message: 'You have already booked this conference' });
-    }
+  try {
+    const registration = await Registration.change(
+      req.user.id,
+      registrationId,
+      conferenceId
+    );
+    return res.json(registration);
+  } catch (error) {
+    return sendBookingError(res, error, 'Changing booking');
+  }
+};
 
-    console.error('Booking failed:', error.message);
-    return res.status(500).json({ message: 'Something went wrong' });
+// CBP-15 Cancel.
+const cancelBooking = async (req, res) => {
+  try {
+    const registration = await Registration.cancel(req.user.id, Number(req.params.id));
+    return res.json(registration);
+  } catch (error) {
+    return sendBookingError(res, error, 'Cancelling booking');
   }
 };
 
@@ -63,4 +97,22 @@ const getMyBookings = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, getMyBookings };
+// Conferences this booking could be moved to. Full and clashing
+// conferences are filtered out server-side, so the change screen only
+// offers moves that will succeed.
+const getMoveTargets = async (req, res) => {
+  try {
+    res.json(await Registration.findMoveTargets(req.user.id, Number(req.params.id)));
+  } catch (error) {
+    console.error('Fetching move targets failed:', error.message);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+};
+
+module.exports = {
+  createBooking,
+  changeBooking,
+  cancelBooking,
+  getMyBookings,
+  getMoveTargets,
+};

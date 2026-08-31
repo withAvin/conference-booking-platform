@@ -4,6 +4,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import BrowseConferences from './pages/BrowseConferences';
 import MyBookings from './pages/MyBookings';
+import ChangeBooking from './pages/ChangeBooking';
 import ManageConferences from './pages/ManageConferences';
 import ConferenceForm from './pages/ConferenceForm';
 import { useAuth } from './context/AuthContext';
@@ -47,6 +48,14 @@ function App() {
             element={
               <RequireRole role="attendee">
                 <MyBookings />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/my-bookings/:id/change"
+            element={
+              <RequireRole role="attendee">
+                <ChangeBooking />
               </RequireRole>
             }
           />
