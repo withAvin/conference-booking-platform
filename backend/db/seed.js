@@ -5,10 +5,9 @@
 // The four conferences are chosen so that every business rule can be
 // demonstrated without creating extra data by hand:
 //
-//   Crypto Conference   09:00-13:00  overlaps Marketing Summit  -> BR-02
-//   Marketing Summit    12:00-17:00  overlaps Crypto Conference -> BR-02
-//   AI Workshop         13:00-17:00  abuts Crypto Conference    -> SC-03
-//   Security Briefing   09:00-11:00  capacity 1                 -> BR-01 / TC-01
+//   Crypto Conference    09:00-13:00  overlaps Security Briefing  -> BR-02
+//   Leadership Workshop  13:00-17:00  abuts Crypto Conference     -> SC-03
+//   Security Briefing    09:00-11:00  capacity 1                  -> BR-01 / TC-01
 
 require('dotenv').config();
 const fs = require('fs');
@@ -19,8 +18,7 @@ const CONFERENCE_DATE = '2026-10-05';
 
 const conferences = [
   { title: 'Crypto Conference', start: '09:00', end: '13:00', capacity: 30 },
-  { title: 'Marketing Summit', start: '12:00', end: '17:00', capacity: 30 },
-  { title: 'AI Workshop', start: '13:00', end: '17:00', capacity: 30 },
+  { title: 'Leadership Workshop', start: '13:00', end: '17:00', capacity: 30 },
   { title: 'Security Briefing', start: '09:00', end: '11:00', capacity: 1 },
 ];
 
