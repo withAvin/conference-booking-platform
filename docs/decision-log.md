@@ -160,6 +160,13 @@ rather than left as an unmet claim.
   feature as unimplemented, deliberately, so the deferred scope is visible in
   the running application and traceable to CBP-10
 
+**Subsequently revised**
+This decision did not hold in full. CBP-10 was reinstated and delivered on
+31 August, because conference update and delete are part of FR-01 rather than
+optional scope — see D-08. CBP-14 was later removed from the backlog
+altogether as its acceptance criteria were absorbed into CBP-15. CBP-15
+remains the only deferred story.
+
 ---
 
 ## D-06 — Jira keys reconciled by editing the backlog, not the commit history
