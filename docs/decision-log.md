@@ -239,3 +239,38 @@ the code would otherwise have to infer the reasoning.
 | A partial unique index guards against double submission                       | The overlap check cannot catch it: under strict inequalities a conference does not overlap itself, so booking the same conference twice passes BR-02                           |
 | The role is chosen by the user at signup                                      | Accepted for assessment convenience. In production, organizer accounts would be issued by an administrator. Recorded in README known limitations                               |
 | Times are stored as two timestamps rather than a date plus two times          | BR-02 compares instants; splitting the date out would make the overlap expression harder to write and easier to get wrong                                                      |
+
+## D-08 — Conference update and delete reinstated
+
+**Date:** 31 August 2026
+**Sprint:** 3
+
+**What changed**
+CBP-10 was moved from the backlog into Sprint 3 and delivered, reversing
+the deferral recorded in D-05.
+
+**Why**
+Update and Delete are part of FR-01, which specifies organizer CRUD over
+conferences. Deferring them left three artefacts overstating the build:
+the use case diagram showed Edit and Delete conference, the BDD showed
+the operations, and FR-01's requirement text claimed full CRUD. The
+choice was to weaken three design artefacts or to complete the feature.
+
+**Evidence considered**
+Greying out the unbuilt elements in each diagram was considered and
+would have been honest, but FR-01 is a stated functional requirement
+rather than optional scope, and the remaining work was one endpoint pair
+plus an edit mode on an existing form. Completing it was cheaper than
+defending its absence.
+
+**Affected artefacts**
+
+- `backend/models/Conference.js`, `conferenceController.js`,
+  `conferenceRoutes.js`
+- `frontend/src/pages/ConferenceForm.jsx` extended to an edit mode;
+  `ManageConferences.jsx` delete dialog
+- Use case diagram, BDD and requirement diagram now match the build for
+  FR-01
+- Subtask 6.5 added to CBP-10 for the time lock, which was not in the
+  original breakdown
+- D-05 partially superseded: CBP-14 and CBP-15 remain deferred
