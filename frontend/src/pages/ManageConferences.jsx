@@ -1,34 +1,56 @@
-// pages/ManageConferences.jsx — S07
-import { useEffect, useState } from 'react';
+// pages/ManageConferences.jsx — S07, S09
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { Button, Banner, EmptyState, Page } from '../components/ui';
 import ConferenceRow from '../components/ConferenceRow';
+import Dialog from '../components/Dialog';
+import { formatWhen } from '../utils/format';
 
 const ManageConferences = () => {
   const [conferences, setConferences] = useState([]);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    if (location.state?.created) {
-      setSuccess(`Conference created: ${location.state.created}`);
-      window.history.replaceState({}, '');
+  const load = useCallback(async () => {
+    try {
+      const { data } = await axiosInstance.get('/api/conferences');
+      setConferences(data);
+    } catch {
+      setError('Could not load conferences');
     }
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.created) setSuccess(`Conference created: ${location.state.created}`);
+    if (location.state?.updated) setSuccess(`Conference updated: ${location.state.updated}`);
+    if (location.state) window.history.replaceState({}, '');
   }, [location.state]);
 
   useEffect(() => {
-    axiosInstance
-      .get('/api/conferences')
-      .then(({ data }) => setConferences(data))
-      .catch(() => setError('Could not load conferences'));
-  }, []);
+    load();
+  }, [load]);
 
-  // Edit and delete arrive in a later story. The buttons render now so
-  // the screen matches S07 in the prototype.
-  const notYet = () => setError('Edit and delete are not implemented yet');
+  const confirmDelete = async () => {
+    setBusy(true);
+    setError('');
+    setSuccess('');
+    try {
+      await axiosInstance.delete(`/api/conferences/${pendingDelete.id}`);
+      setSuccess(`Deleted ${pendingDelete.title}.`);
+      setPendingDelete(null);
+      await load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not delete the conference');
+      setPendingDelete(null);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <Page
@@ -52,11 +74,32 @@ const ManageConferences = () => {
               key={c.id}
               conference={c}
               variant="organizer"
-              onAction={notYet}
-              onSecondary={notYet}
+              onSecondary={() => navigate(`/conferences/${c.id}/edit`)}
+              onAction={() => setPendingDelete(c)}
             />
           ))}
         </div>
+      )}
+
+      {pendingDelete && (
+        <Dialog
+          title={`Delete ${pendingDelete.title}?`}
+          confirmLabel="Delete"
+          busy={busy}
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={confirmDelete}
+        >
+          <p>{formatWhen(pendingDelete.starts_at, pendingDelete.ends_at)}</p>
+          {pendingDelete.booked > 0 ? (
+            <p className="text-error-ink">
+              {pendingDelete.booked}{' '}
+              {pendingDelete.booked === 1 ? 'person has' : 'people have'} booked. This
+              cannot be deleted.
+            </p>
+          ) : (
+            <p>This conference has no bookings and can be deleted.</p>
+          )}
+        </Dialog>
       )}
     </Page>
   );
