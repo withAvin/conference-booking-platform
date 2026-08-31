@@ -1,9 +1,6 @@
 // models/Conference.js
 const { query } = require('../config/db');
 
-// booked is the confirmed count, which BR-01 checks against capacity.
-// bookedByMe lets the attendee browse screen mark rows the caller has
-// already booked, without a second request.
 const findAll = async (userId = null) => {
   const { rows } = await query(
     `SELECT c.id,
@@ -20,8 +17,6 @@ const findAll = async (userId = null) => {
       ORDER BY c.starts_at`,
     [userId]
   );
-
-  // BOOL_OR returns null when a conference has no confirmed rows.
   return rows.map((r) => ({ ...r, bookedByMe: r.bookedByMe === true }));
 };
 
@@ -53,4 +48,25 @@ const create = async ({ title, startsAt, endsAt, capacity }) => {
   return { ...rows[0], booked: 0, bookedByMe: false };
 };
 
-module.exports = { findAll, findById, create };
+// CBP-10 Update.
+const update = async (id, { title, startsAt, endsAt, capacity }) => {
+  const { rows } = await query(
+    `UPDATE conferences
+        SET title = $2, starts_at = $3, ends_at = $4, capacity = $5
+      WHERE id = $1
+      RETURNING id, title, starts_at, ends_at, capacity`,
+    [id, title, startsAt, endsAt, capacity]
+  );
+  return rows[0] || null;
+};
+
+// CBP-10 Delete. The controller checks for confirmed bookings first so
+// it can explain the refusal. The ON DELETE RESTRICT foreign key on
+// registrations.conference_id is the backstop if that check is ever
+// bypassed.
+const remove = async (id) => {
+  const { rowCount } = await query('DELETE FROM conferences WHERE id = $1', [id]);
+  return rowCount > 0;
+};
+
+module.exports = { findAll, findById, create, update, remove };

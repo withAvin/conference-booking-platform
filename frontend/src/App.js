@@ -58,6 +58,14 @@ function App() {
               </RequireRole>
             }
           />
+          <Route
+            path="/conferences/:id/edit"
+            element={
+              <RequireRole role="organizer">
+                <ConferenceForm />
+              </RequireRole>
+            }
+          />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
