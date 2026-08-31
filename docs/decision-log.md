@@ -278,3 +278,42 @@ defending its absence.
   an attendee with no way to see their own bookings is a visible gap,
   and the endpoint already existed. CBP-15 change and cancel remains
   deferred.
+
+## D-09 — Booking change and cancel reinstated
+
+**Date:** 31 August 2026
+**Sprint:** 3
+
+**What changed**
+CBP-15 was moved from the backlog into Sprint 3 and delivered. SC-04,
+withdrawn in D-05, is reinstated.
+
+**Why**
+The attendee had Create and Read over their own registrations but no
+Update or Delete. FR-03 specifies all four, and the same reasoning that
+reinstated CBP-10 for FR-01 applies here.
+
+**Evidence considered**
+Cancel alone would have closed SC-04 for two points. Change is five
+points and materially harder — a second transaction with self-exclusion
+in the clash query. Both were taken because leaving Update unbuilt would
+have left FR-03 in the same overstated position that D-08 corrected for
+FR-01, and because the change operation is the strongest demonstration
+of the transaction design: it releases one seat and claims another
+atomically, and rolls back cleanly when refused.
+
+Two stories were added to the backlog so that deferred scope remains
+visible: CBP-77 waitlist for full conferences, and CBP-78 restricting
+organizer account creation to an administrator. Both were already named
+in the out-of-scope list and the risk register respectively.
+
+**Affected artefacts**
+
+- `backend/models/Registration.js`, `registrationController.js`,
+  `registrationRoutes.js`
+- `frontend/src/pages/MyBookings.jsx`, `ChangeBooking.jsx`, `App.js`
+- Success criteria: SC-04 reinstated
+- Subtask 10.5 added to CBP-15 for the self-exclusion, which was not in
+  the original breakdown
+- D-05 now fully superseded
+- Use case diagram, BDD and requirement diagram match the build
