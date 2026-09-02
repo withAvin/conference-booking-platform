@@ -9,6 +9,7 @@
 //   Marketing Summit    12:00-17:00  overlaps Crypto Conference -> BR-02
 //   AI Workshop         13:00-17:00  abuts Crypto Conference    -> SC-03
 //   Security Briefing   09:00-11:00  capacity 1                 -> BR-01 / TC-01
+//   Design Forum  14:00-18:00  clashes with Leadership Workshop -> BR-02
 
 require('dotenv').config();
 const fs = require('fs');
@@ -22,6 +23,7 @@ const conferences = [
   { title: 'Marketing Summit', start: '12:00', end: '17:00', capacity: 30 },
   { title: 'AI Workshop', start: '13:00', end: '17:00', capacity: 30 },
   { title: 'Security Briefing', start: '09:00', end: '11:00', capacity: 1 },
+  { title: 'Design Forum', start: '14:00', end: '18:00', capacity: 20 },
 ];
 
 const seed = async () => {
