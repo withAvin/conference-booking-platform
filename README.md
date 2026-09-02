@@ -32,13 +32,13 @@ attendee or organizer role at signup.
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
+| Layer    | Technology                                           |
+| -------- | ---------------------------------------------------- |
 | Frontend | React (Create React App), Tailwind CSS, React Router |
-| Backend | Node.js, Express |
-| Database | PostgreSQL |
-| Auth | JSON Web Tokens, bcryptjs |
-| Hosting | AWS EC2, Ubuntu, single instance |
+| Backend  | Node.js, Express                                     |
+| Database | PostgreSQL                                           |
+| Auth     | JSON Web Tokens, bcryptjs                            |
+| Hosting  | AWS EC2, Ubuntu, single instance                     |
 
 ---
 
@@ -97,11 +97,12 @@ npm run seed
 This drops and recreates the three tables and inserts three demo conferences,
 chosen so that every rule can be demonstrated without creating data by hand:
 
-| Conference | Times | Capacity | Demonstrates |
-|---|---|---|---|
-| Crypto Conference | 09:00 – 13:00 | 30 | — |
-| Leadership Workshop | 13:00 – 17:00 | 30 | Abuts Crypto Conference, so both are bookable (SC-03) |
-| Security Briefing | 09:00 – 11:00 | 1 | Overlaps Crypto Conference (BR-02); capacity 1 for the concurrency test |
+| Conference          | Times         | Capacity | Demonstrates                                                            |
+| ------------------- | ------------- | -------- | ----------------------------------------------------------------------- |
+| Crypto Conference   | 09:00 – 13:00 | 30       | —                                                                       |
+| Leadership Workshop | 13:00 – 17:00 | 30       | Abuts Crypto Conference, so both are bookable (SC-03)                   |
+| Security Briefing   | 09:00 – 11:00 | 1        | Overlaps Crypto Conference (BR-02); capacity 1 for the concurrency test |
+| Design Forum        | 14:00 – 18:00 | 20       | Clashes with Leadership Workshop, a second BR-02 case                   |
 
 ### 5. Run
 
@@ -160,7 +161,7 @@ moving onto it.
 Two database-level backstops support the application logic:
 
 - A **partial unique index** on `(attendee_id, conference_id) WHERE status =
-  'confirmed'` stops a double submit creating two bookings for one conference.
+'confirmed'` stops a double submit creating two bookings for one conference.
   The overlap check cannot catch this, because under strict inequalities a
   conference does not overlap itself.
 - **`ON DELETE RESTRICT`** on `registrations.conference_id` refuses deletion of a
@@ -285,14 +286,14 @@ port 5001 handles both the application and its API.
 
 ## Repository
 
-| Item | Location |
-|---|---|
-| Decision log | `docs/decision-log.md` |
-| Iteration plan and sprint reviews | `docs/iteration-plan.md` |
-| Test evidence | `docs/evidence/` |
-| Concurrency test | `backend/test/concurrency.js` |
-| Database schema | `backend/db/schema.sql` |
-| Seed script | `backend/db/seed.js` |
+| Item                              | Location                      |
+| --------------------------------- | ----------------------------- |
+| Decision log                      | `docs/decision-log.md`        |
+| Iteration plan and sprint reviews | `docs/iteration-plan.md`      |
+| Test evidence                     | `docs/evidence/`              |
+| Concurrency test                  | `backend/test/concurrency.js` |
+| Database schema                   | `backend/db/schema.sql`       |
+| Seed script                       | `backend/db/seed.js`          |
 
 Jira project key: **CBP**. Branches and commits are prefixed with the issue key
 they deliver.
